@@ -97,4 +97,10 @@ abstract class Controller {
             throw new Exception("Variável $var_name não identificada.");
         
     }
+
+    protected static function LogError(Exception $e)
+    {
+        $f = fopen("erros.txt", "w");
+        fwrite($f, $e->getTraceAsString());
+    }
 }
