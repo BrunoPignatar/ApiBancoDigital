@@ -12,9 +12,9 @@ class TransacaoDAO extends DAO {
         parent::__construct();      
     }
 
-    public function insert(TransacaoModel $model) 
+    public function insert(TransacaoModel $model)
     {
-        $sql = "INSERT INTO Transacao(valor, data_transacao, id_conta_enviou, id_conta_recebeu) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO conta (valor, data_transacao, id_conta_enviou, id_conta_recebeu) VALUES (?, ?, ?, ?) ";
 
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(1, $model->valor);
@@ -23,12 +23,34 @@ class TransacaoDAO extends DAO {
         $stmt->bindValue(4, $model->id_conta_recebeu);
         $stmt->execute();
 
-        return $this->conexao->lastInsertId();
+        $model->id = $this->conexao->lastInsertId();
+
+        return $model;
     }
 
-    public function update(TransacaoModel $model) 
+    public function search(string $busca) : array
     {
-        $sql = "UPDATE Transacao SET valor = ?, data_transacao = ?, id_conta_enviou = ?, id_conta_recebeu = ? WHERE id = ?";
+        $str_busca = ['filtro' => '%' . $busca . '%'];
+
+        $sql = "SELECT t.*,
+        co1.nome as nome_enviou
+        co2.nome as nome_recebeu
+        FROM Transacao t
+        JOIN Conta c1 ON c1.id = t.id_conta_enviou
+        JOIN Correntista co1 ON co1.id = c1.id_correntista
+        JOIN Conta c2 ON c2.id = t.id_conta_recebeu
+        JOIN Correntista co2 ON co2.id = c2.id_correntista
+        WHERE co1.nome LIKE :filtro ";
+
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute($str_busca);
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, "API\Model\ContaModel");
+    }
+
+    public function update(TransacaoModel $model)
+    {
+        $sql = "UPDATE conta SET valor=?, data_transacao=?, id_conta_enviou = ?, id_conta_recebeu = ? WHERE id=? ";
 
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(1, $model->valor);
@@ -36,52 +58,54 @@ class TransacaoDAO extends DAO {
         $stmt->bindValue(3, $model->id_conta_enviou);
         $stmt->bindValue(4, $model->id_conta_recebeu);
         $stmt->bindValue(5, $model->id);
-
-        return $this->conexao->lastInsertId();    
-    }
-
-    public function select() 
-    {
-        $sql = "SELECT t.*,
-        co.nome1 as nome_enviou
-        co.nome2 as nome_recebeu
-        FROM Transacao t
-        JOIN Conta c1 ON c1.id = t.id_conta_enviou
-        JOIN Correntista co1 ON co1.id = c1.id_correntista
-        JOIN Conta c2 ON c2.id = t.id_conta_recebeu
-        JOIN Correntista co2 ON co2.id = c2.id_correntista";
-       
-
-        $stmt = $this->conexao->prepare($sql);
-
         $stmt->execute();
-        
-        return $stmt->fetchAll(PDO::FETCH_CLASS);
+
+        return $stmt->execute();
     }
 
-    public function selectById($id) 
+    public function select()
     {
         $sql = "SELECT t.*,
         co1.nome as nome_enviou
         co2.nome as nome_recebeu
-        FROM Transacao t             
-                JOIN Conta c1 ON c1.id = t.id_conta_enviou
-                JOIN Correntista co1 ON co1.id = c1.id_correntista
-                JOIN Conta c2 ON c2.id = t.id_conta_recebeu
-                JOIN Correntista co2 ON co2.id = c2.id_correntista
-                WHERE t.id = ?";
-       
+        FROM Transacao t
+        JOIN Conta c1 ON c1.id = t.id_conta_enviou
+        JOIN Correntista co1 ON co1.id = c1.id_correntista
+        JOIN Conta c2 ON c2.id = t.id_conta_recebeu
+        JOIN Correntista co2 ON co2.id = c2.id_correntista
+        ";
+
         $stmt = $this->conexao->prepare($sql);
-        $stmt->bindValue(1, $id);    
         $stmt->execute();
-        return $stmt->fetchObject();
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, "API\Model\ContaModel");
     }
 
-    public function delete($id) 
+    public function selectById(int $id)
     {
-        $sql = "DELETE FROM Transacao WHERE id = ?";
+        $sql = "SELECT t.*,
+        co1.nome as nome_enviou
+        co2.nome as nome_recebeu
+        FROM Transacao t
+        JOIN Conta c1 ON c1.id = t.id_conta_enviou
+        JOIN Correntista co1 ON co1.id = c1.id_correntista
+        JOIN Conta c2 ON c2.id = t.id_conta_recebeu
+        JOIN Correntista co2 ON co2.id = c2.id_correntista
+        WHERE cp.id = ? ";
+
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(1, $id);
         $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, "API\Model\ContaModel");
+    }
+
+    public function delete(int $id)
+    {
+        $sql = "DELETE FROM transacao WHERE id = ? ";
+
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->bindValue(1, $id);
+        return $stmt->execute();
     }
 }

@@ -3,5 +3,5 @@
 namespace BancoDigital\Model;
 
 abstract class Model {
-    public $rows;
+    public $rows = [];
 }

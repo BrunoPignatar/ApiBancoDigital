@@ -7,22 +7,22 @@ class ChavePixController extends Controller {
 	public static function save() : void
 	{
 		try
-		{
-			$json_obj = json_decode(file_get_contents('php://input'));
+        {
+            $json_obj = json_decode(file_get_contents('php://input'));
 
-			$model = new ChavePixModel();
-
-			$model->id = $json_obj->Id;
-			$model->tipo = $json_obj->Tipo;
-			$model->chave = $json_obj->Chave;
+            $model = new ChavePixModel();
+            $model->id = $json_obj->Id;
+            $model->tipo = $json_obj->Tipo;
+            $model->chave = $json_obj->Chave;
 			$model->id_conta = $json_obj->Id_conta;
 
-			parent::GetResponseAsJSON($model->save());
-		}catch(Exception $e)
-		{
-			parent::LogError($e);
-			parent::GetResponseAsJSON($e);
-		}
+            parent::getResponseAsJSON($model->save());
+              
+        } catch (Exception $e) {
+
+            parent::LogError($e);
+            parent::getExceptionAsJSON($e);
+        }
 	}
 
 	public static function select() : void
@@ -62,21 +62,24 @@ class ChavePixController extends Controller {
         }
 	}
 
-	public static function search() : void
+	public static function search()
 	{
 		try
-		{
-			$model = new ChavePixModel();
+        {
+            $model = new ChavePixModel();
+            
+            $busca = json_decode(file_get_contents('php://input'));
+            
+            //fwrite(fopen("dados.json", "w"), file_get_contents('php://input'));
+            
+            $model->getAllRows($busca);
 
-			$busca = json_decode(file_get_contents('php://input'));
+            parent::getResponseAsJSON($model->rows);
+              
+        } catch (Exception $e) {
 
-			$model->getAllRows($busca);
-
-			parent::GetResponseAsJSON($model->rows);
-		}catch(Exception $e)
-		{
-			parent::LogError($e);
+            parent::LogError($e);
             parent::getExceptionAsJSON($e);
-	    }
+        }
 	}
 }

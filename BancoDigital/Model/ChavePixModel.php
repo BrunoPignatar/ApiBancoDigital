@@ -10,26 +10,22 @@ class ChavePixModel extends Model {
 
 	public function save() 
 	{
-		$dao = new ChavePixDAO();
 		if($this->id == null)
-		    $dao->insert($this);
-		else
-		    $dao->update($this);
+		return (new ChavePixDAO())->insert($this);
+	else
+		return (new ChavePixDAO())->update($this);
 	}
 
-	public function getAllRows() 
+	public function getAllRows(string $query = null) 
 	{
 		$dao = new ChavePixDAO();
 
-		$this->rows = $dao->select();	
+        $this->rows = ($query == null) ? $dao->select() : $dao->search($query);
 	}
-
 
 	public function delete(int $id) 
 	{
-		$dao = new ChavePixDAO();
-		
-		$dao->delete($id);
+		(new ChavePixDAO())->delete($id);
 	}
 
 	public function getById(int $id) 

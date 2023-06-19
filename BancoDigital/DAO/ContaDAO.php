@@ -11,9 +11,9 @@ class ContaDAO extends DAO {
         parent::__construct();      
     }
 
-    public function insert(ContaModel $model) 
+    public function insert(ContaModel $model)
     {
-        $sql = "INSERT INTO Conta(tipo, saldo, limite, id_correntista) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO conta (tipo, saldo, limite, id_correntista) VALUES (?, ?, ?, ?) ";
 
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(1, $model->tipo);
@@ -22,12 +22,30 @@ class ContaDAO extends DAO {
         $stmt->bindValue(4, $model->id_correntista);
         $stmt->execute();
 
-        return $this->conexao->lastInsertId();
+        $model->id = $this->conexao->lastInsertId();
+
+        return $model;
     }
 
-    public function update(ContaModel $model) 
+    public function search(string $busca) : array
     {
-        $sql = "UPDATE Conta SET tipo = ?, saldo = ?, limite = ?, id_correntista = ? WHERE id = ?";
+        $str_busca = ['filtro' => '%' . $busca . '%'];
+
+        $sql = "SELECT c.*,
+        co.nome as nome_correntista
+        FROM Conta c
+        JOIN Correntista co ON co.id = c.id_correntista
+        WHERE co.nome LIKE :filtro ";
+
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->execute($str_busca);
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, "API\Model\ContaModel");
+    }
+
+    public function update(ContaModel $model)
+    {
+        $sql = "UPDATE conta SET tipo=?, saldo=?, limite = ?, id_correntista = ? WHERE id=? ";
 
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(1, $model->tipo);
@@ -35,44 +53,46 @@ class ContaDAO extends DAO {
         $stmt->bindValue(3, $model->limite);
         $stmt->bindValue(4, $model->id_correntista);
         $stmt->bindValue(5, $model->id);
+        $stmt->execute();
 
-        return $this->conexao->lastInsertId();
+        return $stmt->execute();
     }
 
-    public function select() 
+    public function select()
     {
         $sql = "SELECT c.*,
-        co.nome as nome_conta
+        co.nome as nome_correntista
         FROM Conta c
-        JOIN Correntista co ON co.id = c.id_correntista";
-       
+        JOIN Correntista co ON co.id = c.id_correntista
+        ";
 
         $stmt = $this->conexao->prepare($sql);
-
         $stmt->execute();
-        
-        return $stmt->fetchAll(PDO::FETCH_CLASS);
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, "API\Model\ContaModel");
     }
 
-    public function selectById($id) 
+    public function selectById(int $id)
     {
         $sql = "SELECT c.*,
-                co.nome as nome_conta
-                FROM Conta c
-                JOIN Correntista co ON co.id = c.id_correntista
-                WHERE id = ?";
-               
-                $stmt = $this->conexao->prepare($sql);
-                $stmt->bindValue(1, $id);    
-                $stmt->execute();
-                return $stmt->fetchObject();
-    }
+        co.nome as nome_correntista
+        FROM Conta c
+        JOIN Correntista co ON co.id = c.id_correntista
+        WHERE cp.id = ? ";
 
-    public function delete($id) 
-    {
-        $sql = "DELETE FROM Conta WHERE id = ?";
         $stmt = $this->conexao->prepare($sql);
         $stmt->bindValue(1, $id);
         $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_CLASS, "API\Model\ContaModel");
+    }
+
+    public function delete(int $id)
+    {
+        $sql = "DELETE FROM conta WHERE id = ? ";
+
+        $stmt = $this->conexao->prepare($sql);
+        $stmt->bindValue(1, $id);
+        return $stmt->execute();
     }
 }

@@ -26,7 +26,7 @@ class TransacaoModel extends Model {
 	public function delete(int $id) 
 	{
 		$dao = new TransacaoDAO();
-
+		
 		$dao->delete($id);
 	}
 

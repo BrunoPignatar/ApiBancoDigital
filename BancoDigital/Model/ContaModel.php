@@ -11,9 +11,9 @@ class ContaModel extends Model {
 	{
 		$dao = new ContaDAO();
 		if($this->id == null)
-		   $dao->insert($this);
+			$dao->insert($this);
 		else
-           $dao->update($this);
+			$dao->update($this);
 	}
 
 	public function getAllRows() 
@@ -26,7 +26,7 @@ class ContaModel extends Model {
 	public function delete(int $id) 
 	{
 		$dao = new ContaDAO();
-
+		
 		$dao->delete($id);
 	}
 
