@@ -37,4 +37,6 @@ class CorrentistaModel extends Model {
 
 		$this->rows = $dao->selectById($id);
 	}
+
+	
 }

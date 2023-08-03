@@ -5,7 +5,7 @@ use BancoDigital\Controller\{
    TransacaoController
 };
 
-$url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$parse_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 switch($parse_uri) {
 
