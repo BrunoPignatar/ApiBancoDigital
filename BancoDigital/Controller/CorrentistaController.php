@@ -3,27 +3,51 @@ namespace BancoDigital\Controller;
 
 use BancoDigital\Model\CorrentistaModel;
 use BancoDigital\Service\Service;
+use Exception;
 
 class CorrentistaController extends Controller {
 	
 	public static function save() 
 	{
-		$json_obj = parent::getJSONFromRequest();
+		try
+        {
+            //$json_obj = parent::getJSONFromRequest();
+            //$json_obj = json_decode(file_get_contents('php://input'));
+            $data = json_decode(file_get_contents('php://input'));
 
-		$model = new CorrentistaModel();
-		$model->id = $json_obj->Id;
-		$model->nome = $json_obj->Nome;
-		$model->cpf = Service::unmaskCPF($json_obj->CPF);
-		$model->data_nasc = $json_obj->Data_nasc;
-		$model->senha = $json_obj->Senha;
-		
-		$model->save();
-		parent::getResponseAsJSON($model);
+            $model = new CorrentistaModel();
+
+            foreach (get_object_vars($data) as $key => $value) 
+            {
+                $prop_letra_minuscula = strtolower($key);
+
+                $model->$prop_letra_minuscula = $value;
+            }
+            parent::getResponseAsJSON($model->save()); 
+
+        
+              
+        } catch (Exception $e) {
+            parent::LogError($e);
+            parent::getExceptionAsJSON($e);
+        }
 	}
 
 	public static function select() 
 	{
+		try
+        {
+            $model = new CorrentistaModel();
+            
+            $model->getAllRows();
 
+            parent::getResponseAsJSON($model->rows);
+              
+        } catch (Exception $e) {
+
+            parent::LogError($e);
+            parent::getExceptionAsJSON($e);
+        }
 	}
 		
 
@@ -31,6 +55,34 @@ class CorrentistaController extends Controller {
 
 	public static function delete() 
 	{
+		try 
+        {
+            $id = json_decode(file_get_contents('php://input'));
+            
+            (new CorrentistaModel())->delete( (int) $id);
 
+        } catch (Exception $e) {
+
+            parent::LogError($e);
+            parent::getExceptionAsJSON($e);
+        }
+	}
+
+	public static function login()
+	{
+		try
+		{
+			$data = json_decode(file_get_contents('php://input'));
+
+			$model = new CorrentistaModel();
+
+			parent::getResponseAsJSON($model->getByCpfAndSenha($data->CPF, $data->Senha)); 
+		}
+		catch(Exception $e)
+		{
+			parent::LogError($e);
+			parent::getExceptionAsJSON($e);
+
+		}
 	}
 }
