@@ -45,7 +45,7 @@ class CorrentistaDAO extends DAO {
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute($str_busca);
 
-        return $stmt->fetchAll(PDO::FETCH_CLASS, "API\Model\CorrentistaModel");
+        return $stmt->fetchAll(PDO::FETCH_CLASS, "BancoDigital\Model\CorrentistaModel");
     }
 
     public function update(CorrentistaModel $model)
@@ -72,7 +72,7 @@ class CorrentistaDAO extends DAO {
         $stmt = $this->conexao->prepare($sql);
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_CLASS, "API\Model\CorrentistaModel");
+        return $stmt->fetchAll(PDO::FETCH_CLASS, "BancoDigital\Model\CorrentistaModel");
     }
 
     public function selectById(int $id)
@@ -85,7 +85,7 @@ class CorrentistaDAO extends DAO {
         $stmt->bindValue(1, $id);
         $stmt->execute();
 
-        return $stmt->fetchAll(PDO::FETCH_CLASS, "API\Model\CorrentistaModel");
+        return $stmt->fetchAll(PDO::FETCH_CLASS, "BancoDigital\Model\CorrentistaModel");
     }
 
     public function selectByCpfAndSenha($cpf, $senha) : CorrentistaModel
@@ -98,7 +98,7 @@ class CorrentistaDAO extends DAO {
         $stmt->execute();
 
         //return $stmt->fetchObject("API\Model\CorrentistaModel"); // Retornando um objeto específico PessoaModel
-        $obj = $stmt->fetchObject("App\Model\CorrentistaModel");
+        $obj = $stmt->fetchObject("BancoDigital\Model\CorrentistaModel");
 
         return is_object($obj) ? $obj : new CorrentistaModel();
     }

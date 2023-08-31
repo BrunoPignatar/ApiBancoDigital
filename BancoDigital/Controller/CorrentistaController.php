@@ -23,6 +23,8 @@ class CorrentistaController extends Controller {
 
                 $model->$prop_letra_minuscula = $value;
             }
+            static $service = new Service;
+            $model->cpf = $service->unmaskCPF($model->cpf);
             parent::getResponseAsJSON($model->save()); 
 
         
